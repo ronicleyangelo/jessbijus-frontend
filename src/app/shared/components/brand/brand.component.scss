@@ -1,0 +1,36 @@
+:host { display: inline-block; }
+
+.brand {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  width: max-content;
+  color: var(--jb-color-brown);
+  text-decoration: none;
+  line-height: 1;
+}
+
+.brand__name {
+  font-family: var(--jb-font-display);
+  font-size: 2.3rem;
+  font-weight: 600;
+  // letter-spacing: -0.045em;
+  letter-spacing: -0.010em;
+}
+
+.brand__tagline {
+  align-self: center;
+  margin-top: 0;
+  color: var(--jb-color-gold);
+  font-family: var(--jb-font-display);
+  font-size: 0.9rem;
+  font-style: italic;
+  font-weight: 600;
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+
+.brand--compact .brand__name { font-size: 1.6rem; }
+.brand--compact .brand__tagline { font-size: 0.5rem; }
+.brand--inverse { color: var(--jb-color-white); }
+.brand--inverse .brand__tagline { color: #f2c789; }

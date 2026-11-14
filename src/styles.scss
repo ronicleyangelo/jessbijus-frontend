@@ -1,0 +1,63 @@
+@use './styles/tokens';
+@use './styles/admin-pages';
+@import 'bootstrap/dist/css/bootstrap-grid.min.css';
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+}
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-button { display: none; width: 0; height: 0; }
+::-webkit-scrollbar-track, ::-webkit-scrollbar-corner { border: 0; background: transparent; }
+::-webkit-scrollbar-thumb {
+  min-height: 44px;
+  border-radius: 999px;
+  background: rgb(93 64 55 / 32%);
+}
+::-webkit-scrollbar-thumb:hover { background: rgb(93 64 55 / 65%); }
+
+@supports not selector(::-webkit-scrollbar) {
+  html { scrollbar-color: #c8b3aa transparent; scrollbar-width: thin; }
+}
+
+body {
+  margin: 0;
+  background: var(--jb-color-background);
+  color: var(--jb-color-text);
+  font-family: var(--jb-font-body);
+  font-size: var(--jb-font-size-base);
+  line-height: var(--jb-line-height-body);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--jb-font-display);
+  line-height: var(--jb-line-height-heading);
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+:focus-visible {
+  outline: 2px solid var(--jb-color-gold-text);
+  outline-offset: 2px;
+}

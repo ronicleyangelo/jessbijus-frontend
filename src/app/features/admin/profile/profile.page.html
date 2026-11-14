@@ -1,0 +1,16 @@
+<main class="admin-page profile-page">
+  <header class="admin-page__heading"><div><h1>Meu perfil</h1><p>Atualize como seu nome e sua foto aparecem no painel.</p></div></header>
+  <section class="admin-card profile-page__card" aria-labelledby="profile-title">
+    @if (profileService.loading()) { <app-loading message="Carregando perfil..." /> }
+    @if (saving) { <app-loading [overlay]="true" message="Salvando perfil..." /> }
+    @if (profileService.error()) { <p class="admin-feedback admin-feedback--error" role="alert">{{ profileService.error() }}</p> }
+    <h2 id="profile-title">Dados do perfil</h2><p class="profile-page__subtitle">Edite apenas suas informações de identificação.</p>
+    <form (ngSubmit)="save()">
+      <div class="profile-page__photo-row"><span class="profile-page__avatar" aria-hidden="true">@if (photoUrl) { <img [src]="photoUrl" alt="" /> } @else { {{ nickname.charAt(0).toUpperCase() || 'J' }} }</span><div><input #photoInput class="profile-page__file" type="file" accept="image/jpeg,image/png,image/webp" (change)="onPhotoSelected($event)" /><button class="admin-button admin-button--soft" type="button" (click)="photoInput.click()">Trocar foto</button><small>JPG ou PNG · até 5 MB</small></div></div>
+      <div class="profile-page__fields"><div class="admin-field"><label for="profile-name">Nome</label><input id="profile-name" name="name" [(ngModel)]="name" required maxlength="80" /></div><div class="admin-field"><label for="profile-nickname">Apelido</label><input id="profile-nickname" name="nickname" [(ngModel)]="nickname" required maxlength="40" /><small>O apelido aparece no cabeçalho do painel.</small></div></div>
+      @if (error) { <p class="admin-feedback admin-feedback--error" role="alert">{{ error }}</p> }
+      <div class="profile-page__actions">@if (saved) { <a class="admin-button" routerLink="/admin/visao-geral">Voltar ao painel</a> } @else { <button class="admin-button admin-button--soft" type="button" (click)="cancel()">Cancelar</button><button class="admin-button" type="submit" [disabled]="saving">{{ saving ? 'Salvando...' : 'Salvar alterações' }}</button> }</div>
+    </form>
+  </section>
+  @if (saved) { <p class="profile-page__saved" role="status">Perfil atualizado com sucesso.</p> }
+</main>

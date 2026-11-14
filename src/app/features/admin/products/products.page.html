@@ -1,0 +1,66 @@
+<main class="admin-page products-page">
+  <header class="admin-page__heading"><div><h1>Produtos</h1><p>Cadastre, edite preços e atualize quantidades manualmente.</p></div><button class="admin-button" type="button" (click)="startNewProduct()"><fa-icon [icon]="plusIcon" />Novo produto</button></header>
+  <div class="products-page__grid">
+    <section class="admin-card products-page__catalog" aria-labelledby="admin-catalog-title">
+      <h2 id="admin-catalog-title">Seu catálogo</h2>
+      <label class="products-page__search"><span class="sr-only">Buscar produto</span><input type="search" placeholder="Buscar produto..." [value]="search()" (input)="search.set($any($event.target).value)" /></label>
+      @if (catalog.loading()) { <app-loading message="Carregando produtos..." /> } @else if (catalog.error()) { <p class="admin-feedback admin-feedback--error" role="alert">{{ catalog.error() }}</p> } @else if (filteredProducts().length) {
+        <div class="products-page__list">@for (product of filteredProducts(); track product.id) {
+          <button class="products-page__item" type="button" [class.is-selected]="selectedProductId() === product.id" (click)="selectProduct(product.id)">
+            <img [src]="product.imageUrl" [alt]="product.imageAlt" />
+            <span><strong>{{ product.name }}</strong><small>{{ product.price | brlCurrency }} · {{ product.stockQuantity }} {{ product.stockQuantity === 1 ? 'unidade' : 'unidades' }}</small></span>
+            @if (product.active === false) { <em>Inativo</em> }
+          </button>
+        }</div>
+      } @else { <p class="admin-empty">Nenhum produto encontrado.</p> }
+    </section>
+
+    <section class="admin-card products-page__editor" aria-labelledby="editor-title">
+      @if (saving) { <app-loading message="Salvando produto..." [overlay]="true" /> }
+      <div class="products-page__editor-heading"><h2 id="editor-title">{{ selectedProductId() ? 'Editar produto' : 'Cadastrar produto' }}</h2><p>{{ selectedProductId() ? selectedProduct()?.name : 'Adicione uma nova peça ao catálogo' }}</p></div>
+      <p-stepper [(value)]="step" [linear]="true" class="products-page__stepper" aria-label="Etapas do produto">
+        <p-step-list>
+          <p-step [value]="1">Dados do produto</p-step>
+          <p-step [value]="2" [disabled]="!canContinue()">Fotos e vídeos</p-step>
+        </p-step-list>
+      </p-stepper>
+      <form (ngSubmit)="saveProduct()">
+        @if (step() === 1) {
+        <div class="products-page__photo-row">
+          <div class="products-page__photo"><img [src]="draft.imageUrl || '/images/product-placeholder.svg'" [alt]="draft.imageUrl ? draft.imageAlt : 'Nenhuma foto selecionada. Adicione uma foto principal.'" /></div>
+          <div><strong>Foto principal</strong><p>Escolha a imagem que aparece na loja.</p><input #mainPhotoInput class="products-page__file" type="file" accept="image/jpeg,image/png,image/webp" (change)="onMainPhoto($event)" /><button class="admin-button admin-button--soft products-page__photo-button" type="button" (click)="mainPhotoInput.click()">{{ draft.imageUrl ? 'Trocar foto' : 'Adicionar foto' }}</button></div>
+        </div>
+        <div class="admin-field"><label for="product-name">Nome</label><input id="product-name" name="name" [(ngModel)]="draft.name" placeholder="Nome da peça" required maxlength="160" /></div>
+        <div class="admin-field"><label for="product-description">Descrição</label><textarea id="product-description" name="description" [(ngModel)]="draft.description" placeholder="Detalhes da peça para a página do produto"></textarea></div>
+        <div class="products-page__form-grid">
+          <div class="admin-field"><label for="product-category">Categoria</label><p-select inputId="product-category" name="category" [(ngModel)]="draft.category" [options]="categoryOptions" optionLabel="label" optionValue="value" placeholder="Selecione uma categoria" appendTo="body" styleClass="products-page__select" panelStyleClass="products-page__select-panel" required /></div>
+          <div class="admin-field"><label for="product-price">Preço</label><input id="product-price" name="price" [(ngModel)]="draft.price" (blur)="formatPrice()" inputmode="decimal" placeholder="R$ 0,00" required /></div>
+          <div class="admin-field"><label for="product-stock">Quantidade em estoque</label><input id="product-stock" name="stock" type="number" min="0" step="1" [(ngModel)]="draft.stockQuantity" required /></div>
+          <div class="admin-field"><label for="product-active">Disponibilidade</label><p-select inputId="product-active" name="active" [(ngModel)]="draft.active" [options]="availabilityOptions" optionLabel="label" optionValue="value" appendTo="body" styleClass="products-page__select" panelStyleClass="products-page__select-panel" /></div>
+        </div>
+        <div class="admin-field"><label for="product-badge">Destaque na loja</label><p-select inputId="product-badge" name="badge" [(ngModel)]="draft.badge" [options]="badgeOptions" optionLabel="label" optionValue="value" appendTo="body" styleClass="products-page__select" panelStyleClass="products-page__select-panel" /></div>
+        @if (error) { <p class="admin-feedback admin-feedback--error" role="alert">{{ error }}</p> }
+        <div class="products-page__actions"><button class="admin-button admin-button--soft" type="button" (click)="nextStep()">Continuar para fotos e vídeos →</button>@if (selectedProductId()) { <button class="admin-button" type="button" [disabled]="saving" (click)="saveProduct()">{{ saving ? 'Salvando...' : 'Salvar alterações' }}</button> }</div>
+        } @else {
+        <section class="products-page__media" aria-labelledby="product-gallery-title">
+          <h3 id="product-gallery-title">Fotos e vídeos do produto <span>{{ media().length }}</span></h3>
+          <p>Mostre outros ângulos ou a peça em vídeo. A foto principal aparece primeiro.</p>
+          <input #extraMediaInput class="products-page__file" type="file" accept="image/jpeg,image/png,image/webp,video/mp4,video/webm" multiple (change)="addMediaFiles($event)" />
+          <button class="admin-button admin-button--soft products-page__media-upload" type="button" [disabled]="uploadingMedia" (click)="extraMediaInput.click()">{{ uploadingMedia ? 'Carregando arquivos...' : 'Adicionar fotos ou vídeos' }}</button>
+          @if (uploadingMedia) { <app-loading message="Preparando arquivos..." /> }
+          <p class="products-page__media-note">Selecione vários arquivos de uma vez. Fotos até 5 MB; vídeos MP4 ou WebM até 10 MB.</p>
+          @if (media().length) { <ol class="products-page__media-list">@for (item of media(); track item.id; let index = $index) {
+            <li><div class="products-page__media-preview">@if (item.type === 'image') { <img [src]="item.url" [alt]="item.alt" /> } @else { <video [src]="item.url" muted playsinline preload="metadata" [attr.aria-label]="item.alt"></video><span class="products-page__video" aria-hidden="true">▶</span> }</div><span class="products-page__media-name">{{ item.type === 'video' ? 'Vídeo' : 'Foto' }} {{ index + 1 }}</span><div class="products-page__media-actions"><button type="button" [disabled]="index === 0" [attr.aria-label]="'Mover ' + item.alt + ' para cima'" (click)="moveMedia(item.id, -1)">↑</button><button type="button" [disabled]="index === media().length - 1" [attr.aria-label]="'Mover ' + item.alt + ' para baixo'" (click)="moveMedia(item.id, 1)">↓</button><button type="button" [attr.aria-label]="'Remover ' + item.alt" (click)="removeMedia(item.id)">Remover</button></div></li>
+          }</ol> }
+        </section>
+        <aside class="products-page__stock-info" aria-label="Informação sobre estoque"><strong>Controle de estoque</strong><span>Ao vender pelo WhatsApp, ajuste a quantidade após registrar o pedido.</span></aside>
+        @if (error) { <p class="admin-feedback admin-feedback--error" role="alert">{{ error }}</p> }
+        <div class="products-page__actions"><button class="admin-button admin-button--soft" type="button" [disabled]="saving" (click)="step.set(1)">← Voltar</button><button class="admin-button" type="submit" [disabled]="saving || uploadingMedia">{{ saving ? 'Salvando...' : selectedProductId() ? 'Salvar alterações' : 'Cadastrar produto' }}</button></div>
+        }
+      </form>
+
+      @if (selectedProduct(); as product) { <a class="admin-text-link" [routerLink]="['/produto', product.id]">Ver página do produto →</a> }
+    </section>
+  </div>
+  <p class="admin-page__note">Produtos e galeria são salvos na API da loja.</p>
+</main>

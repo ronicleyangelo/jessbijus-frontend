@@ -1,0 +1,64 @@
+<main class="admin-page orders-page">
+  <header class="admin-page__heading"><div><h1>Pedidos</h1><p>Acompanhe cada venda recebida pelo WhatsApp.</p></div><button class="admin-button" type="button" (click)="registering.set(true); feedback = ''"><fa-icon [icon]="plusIcon" />Registrar pedido</button></header>
+  <div class="orders-page__notice"><strong>Pagamento manual por Pix</strong><span>Confira o comprovante e o recebimento antes de mudar o pedido para Confirmado.</span></div>
+
+  <div class="orders-page__grid">
+    <section class="admin-card orders-page__list" aria-labelledby="orders-title">
+      <div class="orders-page__list-heading"><h2 id="orders-title">Pedidos recebidos</h2><button type="button" [disabled]="orders.loading()" (click)="orders.load()">Atualizar</button></div>
+      <div class="orders-page__filters" role="group" aria-label="Filtrar pedidos">
+        <button type="button" [class.is-active]="filter() === 'all'" (click)="setFilter('all')">Todos</button>
+        <button type="button" [class.is-active]="filter() === 'waiting'" (click)="setFilter('waiting')">Aguardando</button>
+        <button type="button" [class.is-active]="filter() === 'confirmed'" (click)="setFilter('confirmed')">Confirmados</button>
+        <button type="button" [class.is-active]="filter() === 'shipped'" (click)="setFilter('shipped')">Enviados</button>
+      </div>
+      @if (orders.loading()) { <app-loading message="Carregando pedidos..." /> } @else if (orders.error()) { <p class="admin-feedback admin-feedback--error" role="alert">{{ orders.error() }}</p> } @else if (visibleOrders().length) {
+        <div class="orders-page__items">@for (order of visibleOrders(); track order.id) {
+          <button class="orders-page__row" [class.is-selected]="!registering() && selectedOrder().id === order.id" type="button" (click)="selectOrder(order.id)">
+            <span class="orders-page__row-top"><strong>{{ order.code }}</strong><strong>{{ order.customerName }}</strong><strong>{{ order.total | currency:'BRL' }}</strong></span>
+            <span class="orders-page__row-bottom"><span>{{ order.createdAt | date:'dd MMM' }} · WhatsApp</span><span [class]="'orders-page__status--' + statusClass(order.status)">{{ statusLabel(order.status) }}</span></span>
+          </button>
+        }</div>
+      } @else { <p class="admin-empty">Nenhum pedido nesta categoria. Registre um pedido recebido pelo WhatsApp.</p> }
+      @if (pageCount() > 1) { <nav class="orders-page__pagination" aria-label="Páginas dos pedidos">
+        <button type="button" [disabled]="page() <= 1" aria-label="Página anterior" (click)="setPage(page() - 1)">‹</button>
+        @for (number of pages(); track number) { <button type="button" [class.is-current]="page() === number" [attr.aria-current]="page() === number ? 'page' : null" (click)="setPage(number)">{{ number }}</button> }
+        <button type="button" [disabled]="page() >= pageCount()" aria-label="Próxima página" (click)="setPage(page() + 1)">›</button>
+      </nav> }
+    </section>
+
+    <section class="admin-card orders-page__detail" aria-label="Detalhes ou cadastro do pedido">
+      @if (saving) { <app-loading [overlay]="true" message="Salvando pedido..." /> }
+      @if (registering()) {
+        <h2>Registrar pedido</h2><p class="orders-page__subheading">Anote a venda recebida no WhatsApp.</p>
+        <form class="orders-page__form" (ngSubmit)="createOrder()">
+          <div class="admin-field"><label for="order-customer">Nome da cliente</label><input id="order-customer" name="customerName" [(ngModel)]="customerName" placeholder="Nome completo" required /></div>
+          <div class="admin-field"><label for="order-contact">WhatsApp da cliente (opcional)</label><input id="order-contact" name="contact" [(ngModel)]="contact" placeholder="(27) 99999-9999" /></div>
+          <div class="admin-field"><label for="order-product">Produto</label><select id="order-product" name="productId" [(ngModel)]="productId"><option value="">Selecione uma peça</option>@for (product of catalog.activeProducts(); track product.id) { <option [value]="product.id" [disabled]="product.stockQuantity < 1">{{ product.name }} · {{ product.price | currency:'BRL' }} · {{ product.stockQuantity }} un.</option> }</select></div>
+          <div class="admin-field"><label for="order-quantity">Quantidade</label><input id="order-quantity" name="quantity" type="number" min="1" step="1" [(ngModel)]="quantity" /></div>
+          <button class="admin-button admin-button--soft" type="button" (click)="addItem()">Adicionar peça</button>
+          @if (catalog.error()) { <p class="admin-feedback admin-feedback--error" role="alert">{{ catalog.error() }}</p> }
+          @if (draftItems().length) { <ul class="orders-page__draft-items">@for (item of draftItems(); track item.productId) { <li><span>{{ item.quantity }} × {{ catalog.find(item.productId)?.name }}</span><button type="button" (click)="removeItem(item.productId)">Remover</button></li> }</ul> }
+          <p><strong>Total: {{ draftTotal() | currency:'BRL' }}</strong></p>
+          <p class="orders-page__payment">Pagamento: Pix combinado</p>
+          @if (error) { <p class="admin-feedback admin-feedback--error" role="alert">{{ error }}</p> }
+          <button class="admin-button" type="submit" [disabled]="saving">{{ saving ? 'Salvando...' : 'Salvar pedido' }}</button>
+          <p class="orders-page__hint">O pedido começa como Aguardando contato; depois você acompanha o Pix manualmente.</p>
+        </form>
+      } @else if (selectedOrder(); as order) {
+        <h2>Pedido {{ order.code }}</h2><p class="orders-page__subheading">{{ order.customerName }} @if (order.contact) { · {{ order.contact }} }</p>
+        <div class="orders-page__details"><span class="orders-page__eyebrow">ITENS DO PEDIDO</span><p class="orders-page__summary">{{ order.itemsSummary }}</p></div>
+        <div class="orders-page__total"><span>Total a receber</span><strong>{{ order.total | currency:'BRL' }}</strong></div>
+        <div class="orders-page__details"><span class="orders-page__eyebrow">PAGAMENTO</span><p>Pix combinado com a cliente</p><p class="orders-page__status-text">Status: {{ statusLabel(order.status) }}</p></div>
+        <div class="orders-page__actions">
+          @if (order.status === 'AWAITING_CONTACT') { <button class="admin-button admin-button--soft" type="button" [disabled]="saving" (click)="updateStatus('AWAITING_PIX')">Aguardando Pix</button> }
+          @if (order.status === 'AWAITING_PIX') { <button class="admin-button" type="button" [disabled]="saving" (click)="updateStatus('CONFIRMED')">Confirmar Pix recebido</button> }
+          @if (order.status === 'CONFIRMED') { <button class="admin-button admin-button--soft" type="button" [disabled]="saving" (click)="updateStatus('SHIPPED')">Marcar como enviado</button> }
+        </div>
+        <p class="orders-page__hint">A alteração de status é feita após conferir o pagamento.</p>
+      } @else { <div class="admin-empty">Selecione um pedido ou registre uma nova venda.</div> }
+      @if (error) { <p class="admin-feedback admin-feedback--error" role="alert">{{ error }}</p> }
+      @if (feedback) { <p class="admin-feedback" role="status">{{ feedback }}</p> }
+    </section>
+  </div>
+  <p class="admin-page__note">Fluxo: WhatsApp → registro do pedido → conferência do Pix → separação → envio.</p>
+</main>

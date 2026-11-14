@@ -1,0 +1,47 @@
+<section class="hero" aria-labelledby="hero-title">
+  <div class="hero__inner">
+    <div class="hero__copy">
+      <p class="hero__eyebrow">JESSBIJUS <span aria-hidden="true">•</span> BIJUTERIAS AUTORAIS</p>
+      <h1 id="hero-title">Seu brilho, do seu jeito.</h1>
+      <p class="hero__description">Acessórios feitos à mão para acompanhar seus momentos especiais.</p>
+      <a class="hero__cta" routerLink="/colecao">Conheça a coleção</a>
+      <p class="hero__note">Escolha suas peças <span aria-hidden="true">•</span> Finalize pelo WhatsApp</p>
+    </div>
+
+    <div class="hero-carousel" aria-label="Fotos da coleção Jessbijus" (mouseenter)="pauseAutoplay()" (mouseleave)="startAutoplay()" (focusin)="pauseAutoplay()" (focusout)="startAutoplay()">
+      @for (slide of slides; track slide.src; let index = $index) {
+        <div class="hero-carousel__photo" [class.hero-carousel__photo--active]="activeSlide() === index" [attr.aria-hidden]="activeSlide() !== index">
+          <img [class]="'hero-carousel__image ' + slide.imageClass" [src]="slide.src" [alt]="activeSlide() === index ? slide.alt : ''" [attr.fetchpriority]="index === 0 ? 'high' : null" />
+        </div>
+      }
+      <button class="hero-carousel__arrow hero-carousel__arrow--previous" type="button" aria-label="Imagem anterior" (click)="previousSlide()">‹</button>
+      <button class="hero-carousel__arrow hero-carousel__arrow--next" type="button" aria-label="Próxima imagem" (click)="nextSlide()">›</button>
+      <!-- <button class="hero-carousel__autoplay" type="button" [attr.aria-label]="autoplayPaused() ? 'Retomar troca automática' : 'Pausar troca automática'" [attr.aria-pressed]="autoplayPaused()" (click)="toggleAutoplay()">{{ autoplayPaused() ? 'Reproduzir' : 'Pausar' }}</button> -->
+      <div class="hero-carousel__dots" aria-label="Escolher imagem">
+        @for (slide of slides; track slide.src; let index = $index) {
+          <button type="button" [class.hero-carousel__dot--active]="activeSlide() === index" [attr.aria-label]="'Mostrar imagem ' + (index + 1)" [attr.aria-current]="activeSlide() === index ? 'true' : null" (click)="goToSlide(index)"></button>
+        }
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="featured" aria-labelledby="featured-title">
+  <div class="featured__inner">
+    <div class="featured__heading">
+      <div>
+        <h2 id="featured-title">Peças para se apaixonar</h2>
+        <p>Feitas à mão para cada momento.</p>
+      </div>
+      <a routerLink="/colecao">Ver coleção completa <span aria-hidden="true">→</span></a>
+    </div>
+    @if (catalog.loading()) { <p role="status">Carregando peças...</p> }
+    @if (catalog.error()) { <p role="alert">{{ catalog.error() }}</p> }
+    <div class="featured__grid">
+      @for (product of featuredProducts(); track product.id) {
+        <app-product-card [product]="product" />
+      }
+    </div>
+    @if (!catalog.loading() && !catalog.error() && !featuredProducts().length) { <p>A coleção ainda não tem produtos cadastrados.</p> }
+  </div>
+</section>

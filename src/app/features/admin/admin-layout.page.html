@@ -1,0 +1,66 @@
+<a class="admin-skip-link" href="#admin-content">Ir para o conteúdo</a>
+
+<div class="admin-layout">
+  @if (sidebarOpen()) {
+    <button class="sidebar-backdrop" type="button" aria-label="Fechar navegação" (click)="sidebarOpen.set(false)"></button>
+  }
+
+  <aside id="admin-navigation" class="admin-sidebar" [class.admin-sidebar--open]="sidebarOpen()">
+    <div class="admin-sidebar__brand"><app-brand [compact]="true" /></div>
+    <p class="admin-sidebar__label">PAINEL DA LOJA</p>
+    <nav class="admin-sidebar__nav" aria-label="Painel administrativo">
+      <a routerLink="/admin/visao-geral" routerLinkActive="is-active" (click)="closeMenus()">
+        <fa-icon [icon]="icons.overview" aria-hidden="true" /><span>Visão geral</span>
+      </a>
+      <a routerLink="/admin/produtos" routerLinkActive="is-active" (click)="closeMenus()">
+        <fa-icon [icon]="icons.products" aria-hidden="true" /><span>Produtos</span>
+      </a>
+      <a routerLink="/admin/pedidos" routerLinkActive="is-active" (click)="closeMenus()">
+        <fa-icon [icon]="icons.orders" aria-hidden="true" /><span>Pedidos</span>
+      </a>
+      <a routerLink="/admin/perfil" routerLinkActive="is-active" (click)="closeMenus()">
+        <fa-icon [icon]="icons.profile" aria-hidden="true" /><span>Perfil</span>
+      </a>
+    </nav>
+    <a class="admin-sidebar__store-link" routerLink="/" (click)="closeMenus()">Ver loja <span aria-hidden="true">↗</span></a>
+    <div class="admin-sidebar__help"><strong>Precisa de ajuda?</strong><p>Gerencie seus produtos e pedidos por aqui.</p></div>
+  </aside>
+
+  <header class="admin-header">
+    <button
+      class="admin-header__menu-button"
+      type="button"
+      [attr.aria-label]="sidebarOpen() ? 'Fechar navegação' : 'Abrir navegação'"
+      aria-controls="admin-navigation"
+      [attr.aria-expanded]="sidebarOpen()"
+      (click)="sidebarOpen.set(!sidebarOpen())"
+    ><fa-icon [icon]="icons.menu" /></button>
+    <span class="admin-header__title">Painel <span aria-hidden="true">/</span> {{ section() }}</span>
+
+    <div class="profile-menu">
+      <button
+        class="profile-menu__trigger"
+        type="button"
+        aria-label="Abrir opções de perfil"
+        aria-haspopup="menu"
+        [attr.aria-expanded]="profileOpen()"
+        (click)="profileOpen.set(!profileOpen())"
+      >
+        <span class="profile-menu__avatar" aria-hidden="true">
+          @if (profile().photoUrl) { <img [src]="profile().photoUrl" alt="" /> }
+          @else { {{ profile().nickname.charAt(0).toUpperCase() || 'J' }} }
+        </span>
+        <span>{{ profile().nickname }}</span>
+      </button>
+      @if (profileOpen()) {
+        <div class="profile-menu__panel" role="menu">
+          <a role="menuitem" routerLink="/admin/perfil" (click)="closeMenus()">Editar perfil</a>
+          <a role="menuitem" routerLink="/" (click)="closeMenus()">Ver loja</a>
+          <button role="menuitem" type="button" (click)="logout()">Sair</button>
+        </div>
+      }
+    </div>
+  </header>
+
+  <div id="admin-content" class="admin-content" tabindex="-1"><router-outlet /></div>
+</div>

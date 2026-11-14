@@ -1,0 +1,80 @@
+<section class="product-detail">
+  <div class="product-detail__inner">
+    @if (product(); as item) {
+      <nav class="product-detail__breadcrumb" aria-label="Navegação">
+        <a routerLink="/">Início</a><span aria-hidden="true">›</span>
+        <a routerLink="/colecao">Coleção</a><span aria-hidden="true">›</span>
+        <span aria-current="page">{{ item.name }}</span>
+      </nav>
+
+      <div class="product-detail__main">
+        <div class="product-detail__gallery">
+          <div class="product-detail__thumbnails" aria-label="Fotos e vídeos do produto">
+            @for (media of gallery(); track media.id; let index = $index) {
+              <button type="button" class="product-detail__thumbnail" [class.product-detail__thumbnail--active]="selectedMediaIndex() === index" [attr.aria-label]="'Ver ' + (media.type === 'video' ? 'vídeo' : 'foto') + ' ' + (index + 1)" [attr.aria-pressed]="selectedMediaIndex() === index" (click)="selectMedia(index)">
+                @if (media.type === 'image') {
+                  <img [src]="media.url" [alt]="media.alt" loading="lazy" />
+                } @else {
+                  <span class="product-detail__video-thumb" aria-hidden="true">▶</span>
+                }
+              </button>
+            }
+          </div>
+          <div class="product-detail__photo">
+            @if (selectedMedia(); as media) {
+              @if (media.type === 'image') {
+                <img [src]="media.url" [alt]="media.alt" fetchpriority="high" />
+              } @else {
+                <video [src]="media.url" controls playsinline preload="metadata" [attr.aria-label]="media.alt || 'Vídeo do produto'"></video>
+              }
+            }
+          </div>
+        </div>
+
+        <div class="product-detail__information">
+          <p class="product-detail__category">{{ categoryLabels[item.category] }} · Jessbijus</p>
+          <h1>{{ item.name }}</h1>
+          @if (item.badge) { <span class="product-detail__badge">{{ item.badge }}</span> }
+          <p class="product-detail__price">{{ item.price | currency:'BRL':'symbol':'1.2-2' }}</p>
+          <p class="product-detail__description">{{ item.description }}</p>
+          <p class="product-detail__note">Peça artesanal feita com carinho para acompanhar seus momentos especiais.</p>
+
+          <div class="product-detail__purchase">
+            <label for="product-quantity">Quantidade</label>
+            <div class="product-detail__quantity" id="product-quantity" role="group" aria-label="Quantidade">
+              <button type="button" aria-label="Diminuir quantidade" [disabled]="quantity() <= 1" (click)="decreaseQuantity()">−</button>
+              <output aria-live="polite">{{ quantity() }}</output>
+              <button type="button" aria-label="Aumentar quantidade" [disabled]="quantity() >= item.stockQuantity" (click)="increaseQuantity()">+</button>
+            </div>
+            <button class="product-detail__cta" type="button" [disabled]="item.stockQuantity < 1" (click)="addToList()">
+              {{ item.stockQuantity < 1 ? 'Indisponível' : 'Adicionar à minha lista' }}
+            </button>
+            <p>Confira sua lista e finalize o pedido pelo WhatsApp.</p>
+          </div>
+        </div>
+      </div>
+
+      <section class="product-detail__related" aria-labelledby="related-title">
+        <div class="product-detail__related-heading">
+          <h2 id="related-title">Você também pode gostar</h2>
+          <a routerLink="/colecao">Ver coleção completa →</a>
+        </div>
+        <div class="product-detail__related-grid">
+          @for (related of relatedProducts(); track related.id) {
+            <app-product-card [product]="related" />
+          }
+        </div>
+      </section>
+    } @else if (catalog.loading()) {
+      <div class="product-detail__not-found" role="status">Carregando produto...</div>
+    } @else if (catalog.error()) {
+      <div class="product-detail__not-found" role="alert">{{ catalog.error() }}</div>
+    } @else {
+      <div class="product-detail__not-found">
+        <h1>Peça não encontrada</h1>
+        <p>Esta peça não está disponível no catálogo.</p>
+        <a routerLink="/colecao">Ver coleção</a>
+      </div>
+    }
+  </div>
+</section>

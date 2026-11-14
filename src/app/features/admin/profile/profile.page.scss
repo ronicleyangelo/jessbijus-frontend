@@ -1,0 +1,13 @@
+.profile-page__card { position: relative; min-height: 405px; }
+.profile-page__subtitle { margin: 4px 0 24px; color: #88766f; font-size: 13px; }
+.profile-page__photo-row { display: flex; align-items: center; gap: 16px; padding-bottom: 26px; border-bottom: 1px solid #eeddd8; }
+.profile-page__avatar { display: grid; flex: 0 0 64px; width: 64px; height: 64px; place-items: center; overflow: hidden; border-radius: 50%; background: #fbe6ea; color: #5c3e34; font-size: 27px; font-weight: 700; }
+.profile-page__avatar img { width: 100%; height: 100%; object-fit: cover; }
+.profile-page__photo-row .admin-button { min-height: 34px; padding: 0 20px; font-size: 12px; }
+.profile-page__photo-row small { display: block; margin-top: 6px; color: #88766f; font-size: 11px; }
+.profile-page__file { display: none; }
+.profile-page__fields { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-top: 25px; }
+.profile-page__actions { display: flex; justify-content: flex-end; gap: 16px; margin-top: 55px; }
+.profile-page__actions .admin-button { min-width: 150px; }
+.profile-page__saved { margin-top: 18px; padding: 16px 20px; border-radius: 10px; background: #fbe6ea; color: #5c3e34; font-size: 13px; font-weight: 600; }
+@media (max-width: 640px) { .profile-page__fields { grid-template-columns: 1fr; gap: 18px; } .profile-page__actions { flex-wrap: wrap; margin-top: 30px; } .profile-page__actions .admin-button { flex: 1; min-width: 130px; } }

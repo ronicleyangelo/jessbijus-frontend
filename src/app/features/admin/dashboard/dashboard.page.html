@@ -1,0 +1,47 @@
+<main class="admin-page dashboard">
+  <header class="admin-page__heading">
+    <div><h1>Visão geral</h1><p>Acompanhe o desempenho da sua loja.</p></div>
+    <a class="admin-button" routerLink="/admin/produtos" [queryParams]="{novo: 1}"><fa-icon [icon]="icons.plus" />Novo produto</a>
+  </header>
+  @if (catalog.error()) { <p class="admin-feedback admin-feedback--error" role="alert">{{ catalog.error() }}</p> }
+
+  <section class="dashboard__stats" aria-label="Indicadores da loja">
+    <div class="admin-card dashboard__stat"><span>Vendas registradas</span><fa-icon [icon]="icons.sales" /><strong>{{ sales() | currency:'BRL' }}</strong><small>Pedidos confirmados e enviados</small></div>
+    <div class="admin-card dashboard__stat"><span>Pedidos recebidos</span><fa-icon [icon]="icons.orders" /><strong>{{ orders.orders().length }}</strong><small>Registrados na API</small></div>
+    <div class="admin-card dashboard__stat"><span>Aguardando Pix</span><fa-icon [icon]="icons.awaiting" /><strong>{{ awaiting() }}</strong><small>Confirmação manual</small></div>
+    <div class="admin-card dashboard__stat"><span>Produtos ativos</span><fa-icon [icon]="icons.products" /><strong>{{ catalog.activeProducts().length }}</strong><small>{{ lowStock().length }} com estoque baixo</small></div>
+  </section>
+
+  <div class="dashboard__columns">
+    <section class="admin-card dashboard__orders" aria-labelledby="recent-orders-title">
+      <div class="admin-card__heading"><h2 id="recent-orders-title">Pedidos recentes</h2><a class="admin-text-link" routerLink="/admin/pedidos">Ver todos →</a></div>
+      @if (orders.loading()) { <p class="admin-empty">Carregando pedidos...</p> } @else if (orders.error()) { <p class="admin-feedback admin-feedback--error" role="alert">{{ orders.error() }}</p> } @else if (orders.recent().length) {
+        <div class="dashboard__table-wrap"><table><thead><tr><th>Pedido</th><th>Cliente</th><th>Data</th><th>Total</th><th>Status</th></tr></thead>
+          <tbody>@for (order of orders.recent().slice(0, 6); track order.id) {
+            <tr><td><a [routerLink]="['/admin/pedidos']" [queryParams]="{pedido: order.id}">{{ order.code }}</a></td><td>{{ order.customerName }}</td><td>{{ order.createdAt | date:'dd MMM' }}</td><td>{{ order.total | currency:'BRL' }}</td><td><span class="admin-status" [class]="'admin-status admin-status--' + statusClass(order.status)">{{ statusLabel(order.status) }}</span></td></tr>
+          }</tbody>
+        </table></div>
+      } @else { <div class="admin-empty">Nenhum pedido registrado ainda.<br />Registre uma venda recebida pelo WhatsApp para acompanhar por aqui.</div> }
+    </section>
+
+    <div class="dashboard__aside">
+      <section class="admin-card" aria-labelledby="low-stock-title">
+        <div class="admin-card__heading"><h2 id="low-stock-title">Estoque baixo</h2><a class="admin-text-link" routerLink="/admin/produtos">Gerenciar →</a></div>
+        @if (lowStock().length) {
+          <ul class="dashboard__low-stock">@for (product of lowStock().slice(0, 4); track product.id) {
+            <li><img [src]="product.imageUrl" [alt]="product.imageAlt" /><span><strong>{{ product.name }}</strong><small>{{ product.stockQuantity }} un.</small></span></li>
+          }</ul>
+        } @else { <p class="dashboard__no-stock">Nenhum produto com estoque baixo.</p> }
+      </section>
+      <section class="admin-card" aria-labelledby="shortcuts-title">
+        <div class="admin-card__heading"><h2 id="shortcuts-title">Atalhos rápidos</h2></div>
+        <nav class="dashboard__shortcuts" aria-label="Atalhos rápidos">
+          <a routerLink="/admin/produtos" [queryParams]="{novo: 1}">＋ <span>Cadastrar produto</span></a>
+          <a routerLink="/admin/pedidos">☷ <span>Ver todos os pedidos</span></a>
+          <a routerLink="/admin/produtos">▣ <span>Atualizar estoque</span></a>
+        </nav>
+      </section>
+    </div>
+  </div>
+  <p class="admin-page__note">Fluxo manual: receber no WhatsApp, registrar o pedido, conferir o Pix e marcar o envio.</p>
+</main>

@@ -1,0 +1,53 @@
+<section class="catalog" aria-labelledby="catalog-title">
+  <div class="catalog__inner">
+    <div class="catalog__heading">
+      <div>
+        <h1 id="catalog-title">{{ activeFilter() === 'todos' ? 'Coleção Jessbijus' : title() }}</h1>
+        <p>Encontre por nome, tipo ou cor. Escolha uma categoria para refinar.</p>
+      </div>
+      <span class="catalog__desktop-count">{{ products().length }} {{ products().length === 1 ? 'peça encontrada' : 'peças encontradas' }}</span>
+    </div>
+
+    <form class="catalog__search" role="search" (submit)="searchProducts($event, searchInput.value)">
+      <label class="visually-hidden" for="catalog-search">Buscar em todos os produtos</label>
+      <input id="catalog-search" #searchInput type="search" [value]="search()" placeholder="Buscar em todos os produtos" />
+      <button type="submit" aria-label="Buscar produtos">⌕</button>
+    </form>
+
+    <nav class="catalog__filters" aria-label="Filtrar produtos">
+      @for (filter of filters; track filter.slug) {
+        <a
+          routerLink="/colecao"
+          [queryParams]="filterQueryParams(filter.slug)"
+          [class.catalog__filter--active]="activeFilter() === filter.slug"
+          [attr.aria-current]="activeFilter() === filter.slug ? 'page' : null"
+        >{{ filter.label }}</a>
+      }
+    </nav>
+    <p class="catalog__mobile-count">{{ products().length }} {{ products().length === 1 ? 'peça encontrada' : 'peças encontradas' }}</p>
+
+    @if (catalog.loading()) { <div class="catalog__empty" role="status">Carregando coleção...</div> } @else if (catalog.error()) { <div class="catalog__empty" role="alert">{{ catalog.error() }}</div> } @else if (visibleProducts().length) {
+      <div class="catalog__grid">
+        @for (product of visibleProducts(); track product.id) {
+          <app-product-card [product]="product" />
+        }
+      </div>
+    } @else {
+      <div class="catalog__empty">
+        <h2>{{ search() ? 'Nenhuma peça encontrada' : 'Ainda não há peças nesta categoria' }}</h2>
+        <p>{{ search() ? 'Tente outra palavra ou veja todas as peças.' : 'Experimente outra categoria ou veja todas as peças.' }}</p>
+        <a routerLink="/colecao">Ver todas as peças</a>
+      </div>
+    }
+
+    @if (pageCount() > 1) {
+      <nav class="catalog__pagination" aria-label="Páginas do catálogo">
+        <a [routerLink]="['/colecao']" [queryParams]="pageQueryParams(page() - 1)" [class.catalog__page--disabled]="page() === 1" [attr.aria-disabled]="page() === 1">‹</a>
+        @for (number of pages(); track number) {
+          <a [routerLink]="['/colecao']" [queryParams]="pageQueryParams(number)" [attr.aria-current]="page() === number ? 'page' : null">{{ number }}</a>
+        }
+        <a [routerLink]="['/colecao']" [queryParams]="pageQueryParams(page() + 1)" [class.catalog__page--disabled]="page() === pageCount()" [attr.aria-disabled]="page() === pageCount()">›</a>
+      </nav>
+    }
+  </div>
+</section>

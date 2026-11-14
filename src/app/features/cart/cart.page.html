@@ -1,0 +1,70 @@
+<section class="cart" aria-labelledby="cart-title">
+  <div class="cart__inner">
+    <a class="cart__back" routerLink="/colecao">← Continuar comprando</a>
+
+    @if (cart.items().length) {
+      <div class="cart__heading">
+        <h1 id="cart-title">Minha lista</h1>
+        <p>Confira as peças antes de pedir pelo WhatsApp.</p>
+      </div>
+
+      <div class="cart__columns">
+        <section class="cart__items" aria-labelledby="selected-items-title">
+          <h2 id="selected-items-title">PEÇAS SELECIONADAS</h2>
+          @for (item of cart.items(); track item.product.id) {
+            <article class="cart-item">
+              <div class="cart-item__media">
+                <img [class]="'cart-item__image cart-item__image--' + item.product.id" [src]="item.product.imageUrl" [alt]="item.product.imageAlt" />
+              </div>
+              <div class="cart-item__details">
+                <h3>{{ item.product.name }}</h3>
+                <strong>{{ item.product.price | currency:'BRL':'symbol':'1.2-2' }}</strong>
+                <div class="cart-item__quantity">
+                  <span>Quantidade</span>
+                  <div class="quantity-control" [attr.aria-label]="'Quantidade de ' + item.product.name">
+                    <button type="button" [disabled]="item.quantity <= 1" [attr.aria-label]="'Diminuir quantidade de ' + item.product.name" (click)="changeQuantity(item.product.id, item.quantity - 1)">−</button>
+                    <output>{{ item.quantity }}</output>
+                    <button type="button" [disabled]="item.quantity >= item.product.stockQuantity" [attr.aria-label]="'Aumentar quantidade de ' + item.product.name" (click)="changeQuantity(item.product.id, item.quantity + 1)">+</button>
+                  </div>
+                </div>
+              </div>
+              <button class="cart-item__remove" type="button" [attr.aria-label]="'Remover ' + item.product.name" (click)="cart.remove(item.product.id)">Remover</button>
+            </article>
+          }
+        </section>
+
+        <section class="cart__summary" aria-labelledby="order-summary-title">
+          <h2 id="order-summary-title">Resumo do pedido</h2>
+          <div class="cart__summary-line">
+            <span>{{ cart.itemCount() }} {{ cart.itemCount() === 1 ? 'peça' : 'peças' }}</span>
+            <strong>{{ cart.total() | currency:'BRL':'symbol':'1.2-2' }}</strong>
+          </div>
+          <div class="cart__summary-line cart__summary-line--total">
+            <strong>Total das peças</strong>
+            <strong>{{ cart.total() | currency:'BRL':'symbol':'1.2-2' }}</strong>
+          </div>
+          <form (submit)="sendOrder($event, nameInput.value, nameInput)">
+            <label for="customer-name">Seu nome <span aria-hidden="true">*</span></label>
+            <input id="customer-name" #nameInput type="text" name="customerName" autocomplete="name" placeholder="Digite seu nome" required maxlength="80" />
+            <p class="cart__name-help">Seu nome será incluído na mensagem para a loja.</p>
+            <p class="cart__manual-note">Entrega e pagamento são combinados diretamente com a loja.</p>
+            @if (error) { <p role="alert">{{ error }}</p> }
+            <button class="cart__send" type="submit" [disabled]="sending">{{ sending ? 'Registrando pedido...' : 'Enviar pedido pelo WhatsApp' }}</button>
+            <p class="cart__disclaimer">Nenhuma cobrança acontece nesta etapa.</p>
+          </form>
+        </section>
+      </div>
+    } @else if (catalog.loading()) {
+      <div class="cart__empty" role="status">Carregando sua lista...</div>
+    } @else if (catalog.error()) {
+      <div class="cart__empty" role="alert">{{ catalog.error() }}</div>
+    } @else {
+      <div class="cart__empty">
+        <div class="cart__empty-icon"><fa-icon [icon]="heartIcon" /></div>
+        <h1 id="cart-title">Sua lista está vazia</h1>
+        <p>Escolha suas peças favoritas para montar seu pedido pelo WhatsApp.</p>
+        <a routerLink="/colecao">Conhecer a coleção</a>
+      </div>
+    }
+  </div>
+</section>

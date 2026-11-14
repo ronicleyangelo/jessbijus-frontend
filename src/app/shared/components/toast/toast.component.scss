@@ -1,0 +1,4 @@
+.jessbijus-toast { max-width: min(390px, calc(100vw - 24px)); }
+.jessbijus-toast .p-toast-message { border-radius: 12px; box-shadow: 0 10px 30px #5c3e3426; font-family: 'DM Sans', sans-serif; }
+.jessbijus-toast .p-toast-summary { font-weight: 700; }
+@media (max-width: 640px) { .jessbijus-toast { right: 12px; left: 12px; width: auto; } }

@@ -1,0 +1,56 @@
+:root {
+  /* Cores da marca */
+  --jb-color-brown: #5d4037;
+  --jb-color-brown-hover: #4c332b;
+  --jb-color-blush: #fce9ed;
+  --jb-color-blush-strong: #f3c7d2;
+  --jb-color-cream: #fff9f6;
+  --jb-color-white: #ffffff;
+  --jb-color-gold: #c68a3c;
+  --jb-color-gold-text: #986019;
+
+  /* Cores semânticas */
+  --jb-color-text: var(--jb-color-brown);
+  --jb-color-text-muted: #715b54;
+  --jb-color-surface: var(--jb-color-white);
+  --jb-color-background: var(--jb-color-cream);
+  --jb-color-border: #ebddd8;
+  --jb-color-success: #4f7d5b;
+  --jb-color-danger: #b64046;
+
+  /* Tipografia */
+  --jb-font-body: 'DM Sans Variable', Arial, sans-serif;
+  --jb-font-display: 'Cormorant Garamond Variable', Georgia, serif;
+  --jb-font-size-xs: 0.75rem;
+  --jb-font-size-sm: 0.875rem;
+  --jb-font-size-base: 1rem;
+  --jb-font-size-md: 1.125rem;
+  --jb-font-size-lg: 1.25rem;
+  --jb-font-size-xl: 1.5rem;
+  --jb-font-size-2xl: 2rem;
+  --jb-font-size-3xl: 2.75rem;
+  --jb-font-size-hero: clamp(2.75rem, 5vw, 4.5rem);
+  --jb-line-height-body: 1.5;
+  --jb-line-height-heading: 1.1;
+
+  /* Espaçamento baseado em passos de 4 px */
+  --jb-space-1: 0.25rem;
+  --jb-space-2: 0.5rem;
+  --jb-space-3: 0.75rem;
+  --jb-space-4: 1rem;
+  --jb-space-5: 1.25rem;
+  --jb-space-6: 1.5rem;
+  --jb-space-8: 2rem;
+  --jb-space-10: 2.5rem;
+  --jb-space-12: 3rem;
+  --jb-space-16: 4rem;
+  --jb-space-20: 5rem;
+  --jb-space-24: 6rem;
+
+  /* Layout e formas */
+  --jb-content-width: 75rem;
+  --jb-radius-sm: 0.5rem;
+  --jb-radius-md: 0.75rem;
+  --jb-radius-lg: 1.25rem;
+  --jb-radius-pill: 9999px;
+}

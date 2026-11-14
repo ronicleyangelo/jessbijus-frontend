@@ -1,0 +1,40 @@
+.orders-page__notice { display: grid; gap: 3px; margin-bottom: 34px; padding: 16px 20px; border-radius: 13px; background: #fbe6ea; }
+.orders-page__notice strong { font-size: 14px; }
+.orders-page__notice span { color: #88766f; font-size: 13px; }
+.orders-page__grid { display: grid; grid-template-columns: minmax(0, 1.75fr) minmax(290px, 1fr); gap: 24px; align-items: stretch; }
+.orders-page__list, .orders-page__detail { min-height: 650px; }
+.orders-page__detail { position: relative; }
+.orders-page__list-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.orders-page__list-heading button { border: 0; background: none; color: #a05b29; cursor: pointer; font: inherit; font-size: 12px; }
+.orders-page__filters { display: flex; flex-wrap: wrap; gap: 18px; margin: 20px 0 8px; border-bottom: 1px solid #eeddd8; }
+.orders-page__filters button { padding: 0 0 12px; border: 0; border-bottom: 2px solid transparent; background: transparent; color: #88766f; font: inherit; font-size: 12px; cursor: pointer; }
+.orders-page__filters button.is-active { border-bottom-color: #c99145; color: #5c3e34; font-weight: 700; }
+.orders-page__items { display: grid; }
+.orders-page__row { display: grid; gap: 16px; width: 100%; padding: 18px 10px; border: 0; border-bottom: 1px solid #eeddd8; background: transparent; color: #5c3e34; font: inherit; text-align: left; cursor: pointer; }
+.orders-page__row.is-selected { border-radius: 9px; background: #fff9f8; }
+.orders-page__row-top { display: grid; grid-template-columns: 92px minmax(0, 1fr) auto; gap: 12px; font-size: 13px; }
+.orders-page__row-top strong:last-child { text-align: right; }
+.orders-page__row-bottom { display: flex; justify-content: space-between; gap: 12px; color: #88766f; font-size: 12px; }
+.orders-page__status--waiting { color: #c75f63; }.orders-page__status--confirmed { color: #6f9274; }.orders-page__status--shipped { color: #5e80a6; }.orders-page__status--canceled { color: #b64046; }
+.orders-page__pagination { display: flex; justify-content: center; gap: 5px; margin-top: 16px; }
+.orders-page__pagination button { min-width: 32px; height: 32px; border: 0; border-radius: 7px; background: transparent; color: #715b54; cursor: pointer; }
+.orders-page__pagination button.is-current { background: #fbe6ea; color: #5c3e34; }
+.orders-page__pagination button:disabled { opacity: .4; cursor: default; }
+.orders-page__subheading { margin: 6px 0 20px; color: #88766f; font-size: 13px; }
+.orders-page__details { padding: 18px 0; border-top: 1px solid #eeddd8; }
+.orders-page__details p { margin: 10px 0 0; font-size: 13px; }
+.orders-page__eyebrow { color: #c99145; font-size: 11px; font-weight: 700; letter-spacing: .04em; }
+.orders-page__summary { white-space: pre-line; line-height: 1.6; }
+.orders-page__total { display: flex; justify-content: space-between; gap: 12px; padding: 18px 0; border-top: 1px solid #eeddd8; }
+.orders-page__total span, .orders-page__hint { color: #88766f; font-size: 12px; }
+.orders-page__status-text { color: #c75f63; }
+.orders-page__actions { display: grid; gap: 10px; margin: 20px 0 34px; }
+.orders-page__actions .admin-button, .orders-page__form .admin-button { width: 100%; }
+.orders-page__form { display: grid; gap: 16px; }
+.orders-page__draft-items { display: grid; gap: 7px; margin: 0; padding: 0; list-style: none; }
+.orders-page__draft-items li { display: flex; justify-content: space-between; gap: 12px; padding: 10px; border-radius: 8px; background: #fff9f8; font-size: 12px; }
+.orders-page__draft-items button { border: 0; background: none; color: #a05b29; cursor: pointer; }
+.orders-page__payment { margin: 4px 0 0; font-size: 13px; font-weight: 600; }
+.orders-page__hint { margin-top: 20px; line-height: 1.45; }
+@media (max-width: 1050px) { .orders-page__grid { grid-template-columns: 1fr; } .orders-page__list, .orders-page__detail { min-height: 0; } }
+@media (max-width: 600px) { .orders-page__notice { margin-bottom: 20px; } .orders-page__row-top { grid-template-columns: 76px minmax(0, 1fr) auto; gap: 6px; font-size: 11px; } .orders-page__filters { gap: 12px; } }
