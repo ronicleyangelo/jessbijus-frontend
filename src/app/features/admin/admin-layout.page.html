@@ -6,7 +6,7 @@
   }
 
   <aside id="admin-navigation" class="admin-sidebar" [class.admin-sidebar--open]="sidebarOpen()">
-    <div class="admin-sidebar__brand"><app-brand [compact]="true" /></div>
+    <div class="admin-sidebar__brand"><app-brand /></div>
     <p class="admin-sidebar__label">PAINEL DA LOJA</p>
     <nav class="admin-sidebar__nav" aria-label="Painel administrativo">
       <a routerLink="/admin/visao-geral" routerLinkActive="is-active" (click)="closeMenus()">

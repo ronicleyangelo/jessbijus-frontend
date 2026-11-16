@@ -7,9 +7,12 @@ import { faBars, faBox, faChartLine, faClipboardList, faUser } from '../../share
 import { BrandComponent } from '../../shared/components/brand/brand.component';
 import { AdminProfileService } from '../../core/services/admin-profile.service';
 import { AdminAuthService } from '../../core/services/admin-auth.service';
+import { ADMIN_CATALOG, ShopCatalogService } from '../../core/services/shop-catalog.service';
+import { ToastService } from '../../core/services/toast.service';
 
 @Component({
   selector: 'app-admin-layout-page',
+  providers: [ShopCatalogService, { provide: ADMIN_CATALOG, useValue: true }],
   imports: [RouterLink, RouterLinkActive, RouterOutlet, FaIconComponent, BrandComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './admin-layout.page.html',
@@ -18,6 +21,7 @@ import { AdminAuthService } from '../../core/services/admin-auth.service';
 export class AdminLayoutPage {
   private readonly router = inject(Router);
   private readonly auth = inject(AdminAuthService);
+  private readonly toast = inject(ToastService);
   readonly profile = inject(AdminProfileService).profile;
   readonly sidebarOpen = signal(false);
   readonly profileOpen = signal(false);
@@ -38,9 +42,13 @@ export class AdminLayoutPage {
     this.profileOpen.set(false);
   }
 
-  logout(): void {
-    this.auth.logout();
-    void this.router.navigateByUrl('/admin/login');
+  async logout(): Promise<void> {
+    try {
+      await this.auth.logout();
+      await this.router.navigateByUrl('/admin/login');
+    } catch {
+      this.toast.error('Não foi possível encerrar a sessão. Tente novamente.');
+    }
   }
 
   private sectionFromUrl(url: string): string {

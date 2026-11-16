@@ -1,14 +1,14 @@
 import { CurrencyPipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { ShopCartService } from '../../core/services/shop-cart.service';
 import { ShopCatalogService } from '../../core/services/shop-catalog.service';
 import { faHeartRegular } from '../../shared/icons';
 import { ApiClient } from '../../core/api/api-client';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, timeout } from 'rxjs';
 
-const WHATSAPP_NUMBER = '5527992710806';
+const WHATSAPP_NUMBER = '5527992285969';
 const currency = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
 
 @Component({
@@ -23,8 +23,8 @@ export class CartPage {
   readonly catalog = inject(ShopCatalogService);
   private readonly api = inject(ApiClient);
   readonly heartIcon = faHeartRegular;
-  sending = false;
-  error = '';
+  readonly sending = signal(false);
+  readonly error = signal('');
 
   changeQuantity(productId: string, quantity: number): void {
     this.cart.setQuantity(productId, quantity);
@@ -38,16 +38,17 @@ export class CartPage {
       nameInput.reportValidity();
       return;
     }
-    if (!this.cart.items().length || typeof window === 'undefined') return;
+    if (!this.cart.items().length || typeof window === 'undefined' || this.sending()) return;
 
-    this.sending = true;
-    this.error = '';
+    this.sending.set(true);
+    this.error.set('');
     try {
-      await firstValueFrom(this.api.placeOrder(name, this.cart.items().map(item => ({ productId: item.product.id, quantity: item.quantity }))));
+      await firstValueFrom(this.api.placeOrder(name, this.cart.items().map(item => ({ productId: item.product.id, quantity: item.quantity }))).pipe(timeout(15_000)));
     } catch {
-      this.error = 'Não foi possível registrar o pedido. Confira sua conexão e tente novamente.';
-      this.sending = false;
+      this.error.set('Não foi possível confirmar o pedido. Verifique sua conexão e tente novamente.');
       return;
+    } finally {
+      this.sending.set(false);
     }
     const lines = [
       'Olá! Gostaria de fazer um pedido na Jessbijus.',
@@ -60,7 +61,6 @@ export class CartPage {
       `Total das peças: ${currency.format(this.cart.total())}`,
       'Podemos combinar entrega e pagamento por aqui?',
     ];
-    window.location.href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(lines.join('\n'))}`;
-    this.sending = false;
+    window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(lines.join('\n'))}`, '_blank', 'noopener,noreferrer');
   }
 }

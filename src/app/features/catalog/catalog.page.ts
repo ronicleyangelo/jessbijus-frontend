@@ -21,13 +21,23 @@ export class CatalogPage {
   readonly catalog = inject(ShopCatalogService);
   private readonly params = toSignal(this.route.queryParamMap, { initialValue: this.route.snapshot.queryParamMap });
 
+  readonly groups = computed(() => [{key: null, label: 'Todos os conjuntos'}, ...this.catalog.subcategories().map(item => ({key: item.slug, label: item.name}))]);
   readonly filters = SHOP_FILTERS;
   readonly activeFilter = computed<ShopFilter>(() => {
     const value = this.params().get('categoria');
     return isShopFilter(value) ? value : 'todos';
   });
   readonly search = computed(() => this.params().get('busca')?.trim() ?? '');
-  readonly products = computed(() => filterProducts(this.catalog.activeProducts(), this.activeFilter(), this.search()));
+  readonly subcategory = computed(() => {
+    const value = this.params().get('subcategoria');
+    return this.activeFilter() === 'conjuntos' && this.catalog.subcategories().some(group => group.slug === value) ? value : null;
+  });
+  readonly products = computed(() => {
+    const products = filterProducts(this.catalog.activeProducts(), this.activeFilter(), this.search());
+    const group = this.subcategory();
+    const name = this.catalog.subcategories().find(item => item.slug === group)?.name;
+    return name ? products.filter(product => product.subcategories?.includes(name)) : products;
+  });
   readonly pageCount = computed(() => Math.ceil(this.products().length / PAGE_SIZE));
   readonly page = computed(() => {
     const requested = Number(this.params().get('pagina') ?? 1);
@@ -55,6 +65,7 @@ export class CatalogPage {
     return {
       categoria: this.activeFilter() === 'todos' ? null : this.activeFilter(),
       busca: this.search() || null,
+      subcategoria: this.subcategory(),
       pagina: page === 1 ? null : page,
     };
   }

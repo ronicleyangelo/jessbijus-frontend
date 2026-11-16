@@ -6,7 +6,7 @@ export const routes: Routes = [
     path: '',
     loadComponent: () => import('./core/layouts/store-layout.page').then(m => m.StoreLayoutPage),
     children: [
-      { path: '', loadComponent: () => import('./features/storefront/storefront.page').then(m => m.StorefrontPage) },
+      { path: '', pathMatch: 'full', loadComponent: () => import('./features/storefront/storefront.page').then(m => m.StorefrontPage) },
       { path: 'colecao', loadComponent: () => import('./features/catalog/catalog.page').then(m => m.CatalogPage) },
       { path: 'produto/:id', loadComponent: () => import('./features/product-detail/product-detail.page').then(m => m.ProductDetailPage) },
       { path: 'minha-lista', loadComponent: () => import('./features/cart/cart.page').then(m => m.CartPage) },

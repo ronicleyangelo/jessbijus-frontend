@@ -37,3 +37,13 @@
   .catalog__empty { min-height: 260px; padding: 24px; }
   .catalog__empty h2 { font-size: 26px; }
 }
+
+.catalog__subcategories {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .75rem;
+  margin-bottom: 1.5rem;
+
+  a { color: inherit; border-radius: 2rem; padding: .5rem 1rem; background: white; text-decoration: none; }
+  a[aria-current] { background: #604238; color: white; }
+}

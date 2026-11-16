@@ -37,15 +37,26 @@ export class ProductDetailPage {
   readonly selectedMedia = computed(() => this.gallery()[Math.min(this.selectedMediaIndex(), this.gallery().length - 1)]);
   readonly relatedProducts = computed(() => this.catalog.activeProducts().filter(item => item.id !== this.product()?.id).slice(0, 3));
   readonly quantity = signal(1);
+  readonly zoomPosition = signal({ x: 50, y: 50 });
   readonly categoryLabels: Record<ShopCategory, string> = {
     brincos: 'Brincos',
     colares: 'Colares',
     pulseiras: 'Pulseiras',
-    conjuntos: 'Conjuntos',
+    conjuntos: 'Conjuntos', aneis: 'Anéis',
   };
 
   selectMedia(index: number): void {
     this.selectedMediaIndex.set(index);
+    this.zoomPosition.set({ x: 50, y: 50 });
+  }
+
+  moveZoom(event: MouseEvent): void {
+    const bounds = event.currentTarget instanceof HTMLElement ? event.currentTarget.getBoundingClientRect() : null;
+    if (!bounds) return;
+    this.zoomPosition.set({
+      x: Math.max(0, Math.min(100, (event.clientX - bounds.left) / bounds.width * 100)),
+      y: Math.max(0, Math.min(100, (event.clientY - bounds.top) / bounds.height * 100)),
+    });
   }
 
   decreaseQuantity(): void {

@@ -1,4 +1,9 @@
 .profile-page__card { position: relative; min-height: 405px; }
+.profile-page__card + .profile-page__card { margin-top: 24px; }
+.profile-page__password-fields { margin: 0; padding: 0; border: 0; min-width: 0; }
+.profile-page__visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.admin-field .profile-page__field-error { color: var(--jb-color-danger); }
+.admin-field input[aria-invalid='true'] { border-color: var(--jb-color-danger); }
 .profile-page__subtitle { margin: 4px 0 24px; color: #88766f; font-size: 13px; }
 .profile-page__photo-row { display: flex; align-items: center; gap: 16px; padding-bottom: 26px; border-bottom: 1px solid #eeddd8; }
 .profile-page__avatar { display: grid; flex: 0 0 64px; width: 64px; height: 64px; place-items: center; overflow: hidden; border-radius: 50%; background: #fbe6ea; color: #5c3e34; font-size: 27px; font-weight: 700; }
@@ -6,7 +11,14 @@
 .profile-page__photo-row .admin-button { min-height: 34px; padding: 0 20px; font-size: 12px; }
 .profile-page__photo-row small { display: block; margin-top: 6px; color: #88766f; font-size: 11px; }
 .profile-page__file { display: none; }
-.profile-page__fields { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-top: 25px; }
+.profile-page__fields { display: grid; grid-template-columns: 1fr 1fr; align-items: start; gap: 32px; margin-top: 25px; }
+.profile-page__fields .admin-field { align-content: start; }
+.profile-page__fields input { box-sizing: border-box; height: 44px; }
+.profile-page__password-fields .profile-page__fields { grid-template-areas: 'current .' 'new confirm'; }
+.profile-page__password-fields .admin-field:nth-child(1) { grid-area: current; }
+.profile-page__password-fields .admin-field:nth-child(2) { grid-area: new; }
+.profile-page__password-fields .admin-field:nth-child(3) { grid-area: confirm; }
+@media (max-width: 640px) { .profile-page__password-fields .profile-page__fields { grid-template-areas: 'current' 'new' 'confirm'; } }
 .profile-page__actions { display: flex; justify-content: flex-end; gap: 16px; margin-top: 55px; }
 .profile-page__actions .admin-button { min-width: 150px; }
 .profile-page__saved { margin-top: 18px; padding: 16px 20px; border-radius: 10px; background: #fbe6ea; color: #5c3e34; font-size: 13px; font-weight: 600; }

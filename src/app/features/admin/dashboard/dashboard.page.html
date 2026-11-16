@@ -7,7 +7,7 @@
 
   <section class="dashboard__stats" aria-label="Indicadores da loja">
     <div class="admin-card dashboard__stat"><span>Vendas registradas</span><fa-icon [icon]="icons.sales" /><strong>{{ sales() | currency:'BRL' }}</strong><small>Pedidos confirmados e enviados</small></div>
-    <div class="admin-card dashboard__stat"><span>Pedidos recebidos</span><fa-icon [icon]="icons.orders" /><strong>{{ orders.orders().length }}</strong><small>Registrados na API</small></div>
+    <div class="admin-card dashboard__stat"><span>Pedidos recebidos</span><fa-icon [icon]="icons.orders" /><strong>{{ orders.orders().length }}</strong></div>
     <div class="admin-card dashboard__stat"><span>Aguardando Pix</span><fa-icon [icon]="icons.awaiting" /><strong>{{ awaiting() }}</strong><small>Confirmação manual</small></div>
     <div class="admin-card dashboard__stat"><span>Produtos ativos</span><fa-icon [icon]="icons.products" /><strong>{{ catalog.activeProducts().length }}</strong><small>{{ lowStock().length }} com estoque baixo</small></div>
   </section>

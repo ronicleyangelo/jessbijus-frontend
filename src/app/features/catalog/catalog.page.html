@@ -24,6 +24,14 @@
         >{{ filter.label }}</a>
       }
     </nav>
+    @if (activeFilter() === 'conjuntos') {
+      <nav class="catalog__subcategories" aria-label="Subcategorias de conjuntos">
+        @for (group of groups(); track group.label) {
+          <a routerLink="/colecao" [queryParams]="{categoria: 'conjuntos', subcategoria: group.key, busca: search() || null}"
+             [attr.aria-current]="subcategory() === group.key ? 'page' : null">{{ group.label }}</a>
+        }
+      </nav>
+    }
     <p class="catalog__mobile-count">{{ products().length }} {{ products().length === 1 ? 'peça encontrada' : 'peças encontradas' }}</p>
 
     @if (catalog.loading()) { <div class="catalog__empty" role="status">Carregando coleção...</div> } @else if (catalog.error()) { <div class="catalog__empty" role="alert">{{ catalog.error() }}</div> } @else if (visibleProducts().length) {

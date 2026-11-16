@@ -18,9 +18,16 @@
 .admin-field input, .admin-field select, .admin-field textarea { width: 100%; min-height: 44px; padding: 11px 14px; border: 1px solid transparent; border-radius: 9px; background: #fff9f8; color: #5c3e34; font: inherit; font-size: 14px; }
 .admin-field textarea { min-height: 92px; resize: vertical; }
 .admin-field input:focus-visible, .admin-field select:focus-visible, .admin-field textarea:focus-visible { border-color: #c99145; outline: 2px solid #f3c7d2; }
-.products-page .p-select.products-page__select { display: flex; width: 100%; min-height: 44px; border: 1px solid transparent; border-radius: 9px; background: #fff9f8; box-shadow: none; color: #5c3e34; font: inherit; }
+.products-page .admin-field { align-content: start; }
+.products-page .admin-field input, .products-page .admin-field textarea, .products-page .p-select.products-page__select {
+  box-sizing: border-box;
+  height: 36px;
+  min-height: 36px;
+}
+.products-page .admin-field input, .products-page .admin-field textarea { padding: 7px 12px; }
+.products-page .p-select.products-page__select { display: flex; width: 100%; border: 1px solid transparent; border-radius: 9px; background: #fff9f8; box-shadow: none; color: #5c3e34; font: inherit; }
 .products-page .p-select.products-page__select.p-focus { border-color: #c99145; outline: 2px solid #f3c7d2; }
-.products-page__select .p-select-label { display: flex; align-items: center; padding: 10px 14px; color: #5c3e34; font-size: 14px; }
+.products-page__select .p-select-label { display: flex; align-items: center; padding: 0 12px; color: #5c3e34; font-size: 14px; }
 .products-page__select .p-select-label.p-placeholder { color: #88766f; }
 .products-page__select .p-select-dropdown { color: #715b54; }
 .products-page__select-panel.p-select-overlay { border: 1px solid #eeddd8; border-radius: 9px; background: #fff; box-shadow: 0 12px 32px #5c3e3426; }

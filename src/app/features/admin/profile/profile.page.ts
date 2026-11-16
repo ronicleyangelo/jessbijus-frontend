@@ -1,13 +1,15 @@
-import { ChangeDetectionStrategy, Component, effect, inject } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, effect, inject } from '@angular/core';
+import { FormsModule, NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Router, RouterLink } from '@angular/router';
+import { AdminAuthService } from '../../../core/services/admin-auth.service';
 import { AdminProfileService } from '../../../core/services/admin-profile.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { LoadingComponent } from '../../../shared/components/loading/loading.component';
+import { passwordChangeValidator } from '../../../shared/validators/password.validators';
 
 @Component({
   selector: 'app-profile-page',
-  imports: [FormsModule, RouterLink, LoadingComponent],
+  imports: [FormsModule, ReactiveFormsModule, RouterLink, LoadingComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './profile.page.html',
   styleUrl: './profile.page.scss',
@@ -15,6 +17,16 @@ import { LoadingComponent } from '../../../shared/components/loading/loading.com
 export class ProfilePage {
   readonly profileService = inject(AdminProfileService);
   private readonly toast = inject(ToastService);
+  private readonly auth = inject(AdminAuthService);
+  private readonly router = inject(Router);
+  private readonly changeDetector = inject(ChangeDetectorRef);
+  readonly passwordForm = inject(NonNullableFormBuilder).group({
+    currentPassword: ['', [Validators.required, Validators.maxLength(128)]],
+    newPassword: ['', [Validators.required, Validators.minLength(8), Validators.maxLength(128), Validators.pattern(/[^\p{L}\p{N}\s]/u)]],
+    confirmPassword: ['', [Validators.required, Validators.maxLength(128)]],
+  }, { validators: passwordChangeValidator });
+  passwordError = '';
+  changingPassword = false;
   name = this.profileService.profile().name;
   nickname = this.profileService.profile().nickname;
   photoUrl = this.profileService.profile().photoUrl;
@@ -57,6 +69,7 @@ export class ProfilePage {
 
   async save(): Promise<void> {
     if (!this.name.trim() || !this.nickname.trim()) { this.error = 'Preencha nome e apelido.'; this.toast.warn(this.error); return; }
+    if (this.saving) return;
     this.saving = true;
     try {
       await this.profileService.save({ name: this.name.trim(), nickname: this.nickname.trim(), photoUrl: this.photoUrl });
@@ -66,7 +79,10 @@ export class ProfilePage {
     } catch {
       this.error = 'Não foi possível salvar o perfil na API.';
       this.toast.error(this.error);
-    } finally { this.saving = false; }
+    } finally {
+      this.saving = false;
+      this.changeDetector.markForCheck();
+    }
   }
 
   cancel(): void {
@@ -76,5 +92,35 @@ export class ProfilePage {
     this.photoUrl = profile.photoUrl;
     this.error = '';
     this.saved = false;
+  }
+
+  async changePassword(): Promise<void> {
+    if (this.changingPassword) return;
+    this.passwordForm.markAllAsTouched();
+    if (this.passwordForm.invalid || this.passwordForm.pending) {
+      return;
+    }
+    this.changingPassword = true;
+    this.passwordError = '';
+    try {
+      const { currentPassword, newPassword } = this.passwordForm.getRawValue();
+      await this.auth.changePassword(currentPassword, newPassword);
+      this.passwordForm.reset();
+      await this.router.navigate(['/admin/login'], { queryParams: { passwordChanged: '1' } });
+    } catch (error) {
+      this.passwordError = error instanceof Error ? error.message : 'Não foi possível alterar a senha.';
+    } finally { this.changingPassword = false; this.changeDetector.markForCheck(); }
+  }
+
+  passwordFieldError(field: 'currentPassword' | 'newPassword' | 'confirmPassword'): string {
+    const control = this.passwordForm.controls[field];
+    if (!control.touched && !control.dirty) return '';
+    if (control.hasError('required')) return field === 'confirmPassword' ? 'Confirme a nova senha.' : 'Informe a senha.';
+    if (control.hasError('minlength')) return 'Use pelo menos 8 caracteres.';
+    if (control.hasError('pattern')) return 'Inclua pelo menos um símbolo, como ! ou @.';
+    if (control.hasError('maxlength')) return 'Use no máximo 128 caracteres.';
+    if (field === 'newPassword' && this.passwordForm.hasError('passwordUnchanged')) return 'A nova senha deve ser diferente da atual.';
+    if (field === 'confirmPassword' && this.passwordForm.hasError('passwordMismatch')) return 'A confirmação não corresponde à nova senha.';
+    return '';
   }
 }

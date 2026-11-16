@@ -13,4 +13,32 @@
     </form>
   </section>
   @if (saved) { <p class="profile-page__saved" role="status">Perfil atualizado com sucesso.</p> }
+  <section class="admin-card profile-page__card" aria-labelledby="password-title">
+    <h2 id="password-title">Alterar senha</h2>
+    <p class="profile-page__subtitle">Use pelo menos 8 caracteres e um símbolo, como ! ou @. Depois da alteração, entre novamente em seus dispositivos.</p>
+    <form [formGroup]="passwordForm" (ngSubmit)="changePassword()" (input)="passwordError = ''">
+      <fieldset class="profile-page__password-fields" [disabled]="changingPassword">
+        <legend class="profile-page__visually-hidden">Dados para alterar a senha</legend>
+        <div class="profile-page__fields">
+          <div class="admin-field">
+            <label for="current-password">Senha atual</label>
+            <input id="current-password" formControlName="currentPassword" type="password" autocomplete="current-password" required maxlength="128" [attr.aria-invalid]="!!passwordFieldError('currentPassword')" [attr.aria-describedby]="passwordFieldError('currentPassword') ? 'current-password-error' : null" />
+            @if (passwordFieldError('currentPassword'); as message) { <small id="current-password-error" class="profile-page__field-error" aria-live="polite">{{ message }}</small> }
+          </div>
+          <div class="admin-field">
+            <label for="new-password">Nova senha</label>
+            <input id="new-password" formControlName="newPassword" type="password" autocomplete="new-password" required minlength="8" maxlength="128" [attr.aria-invalid]="!!passwordFieldError('newPassword')" [attr.aria-describedby]="passwordFieldError('newPassword') ? 'new-password-error' : null" />
+            @if (passwordFieldError('newPassword'); as message) { <small id="new-password-error" class="profile-page__field-error" aria-live="polite">{{ message }}</small> }
+          </div>
+          <div class="admin-field">
+            <label for="confirm-password">Confirme a nova senha</label>
+            <input id="confirm-password" formControlName="confirmPassword" type="password" autocomplete="new-password" required maxlength="128" [attr.aria-invalid]="!!passwordFieldError('confirmPassword')" [attr.aria-describedby]="passwordFieldError('confirmPassword') ? 'confirm-password-error' : null" />
+            @if (passwordFieldError('confirmPassword'); as message) { <small id="confirm-password-error" class="profile-page__field-error" aria-live="polite">{{ message }}</small> }
+          </div>
+        </div>
+      </fieldset>
+      @if (passwordError) { <p class="admin-feedback admin-feedback--error" role="alert">{{ passwordError }}</p> }
+      <div class="profile-page__actions"><button class="admin-button" type="submit" [disabled]="passwordForm.invalid || passwordForm.pending || changingPassword">{{ changingPassword ? 'Alterando...' : 'Alterar senha' }}</button></div>
+    </form>
+  </section>
 </main>

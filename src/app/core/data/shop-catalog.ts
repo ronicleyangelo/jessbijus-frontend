@@ -6,6 +6,7 @@ export const SHOP_FILTERS: ReadonlyArray<{ slug: ShopFilter; label: string }> = 
   { slug: 'brincos', label: 'Brincos' },
   { slug: 'colares', label: 'Colares' },
   { slug: 'pulseiras', label: 'Pulseiras' },
+  { slug: 'aneis', label: 'Anéis' },
   { slug: 'conjuntos', label: 'Conjuntos' },
   { slug: 'mais-vendidos', label: 'Mais vendidos' },
 ];
@@ -71,6 +72,7 @@ export function filterProducts(products: ReadonlyArray<ShopProduct>, filter: Sho
       filter === 'todos' ||
       (filter === 'novidades' && product.isNew) ||
       (filter === 'mais-vendidos' && product.isBestSeller) ||
+
       product.category === filter;
     if (!matchesFilter) return false;
     if (!query) return true;

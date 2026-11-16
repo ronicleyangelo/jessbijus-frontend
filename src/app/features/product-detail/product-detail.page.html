@@ -20,10 +20,10 @@
               </button>
             }
           </div>
-          <div class="product-detail__photo">
+          <div class="product-detail__photo" (mousemove)="moveZoom($event)">
             @if (selectedMedia(); as media) {
               @if (media.type === 'image') {
-                <img [src]="media.url" [alt]="media.alt" fetchpriority="high" />
+                <img [src]="media.url" [alt]="media.alt" fetchpriority="high" [style.transform-origin]="zoomPosition().x + '% ' + zoomPosition().y + '%'" />
               } @else {
                 <video [src]="media.url" controls playsinline preload="metadata" [attr.aria-label]="media.alt || 'Vídeo do produto'"></video>
               }
@@ -32,7 +32,7 @@
         </div>
 
         <div class="product-detail__information">
-          <p class="product-detail__category">{{ categoryLabels[item.category] }} · Jessbijus</p>
+          <p class="product-detail__category">{{ categoryLabels[item.category] }}@if (item.subcategories?.length) { · {{ item.subcategories?.join(', ') }} } · Jessbijus</p>
           <h1>{{ item.name }}</h1>
           @if (item.badge) { <span class="product-detail__badge">{{ item.badge }}</span> }
           <p class="product-detail__price">{{ item.price | currency:'BRL':'symbol':'1.2-2' }}</p>

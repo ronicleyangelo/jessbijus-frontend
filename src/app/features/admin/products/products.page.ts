@@ -1,8 +1,9 @@
 import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
+import { ChipModule } from 'primeng/chip';
 import { SelectModule } from 'primeng/select';
 import { StepperModule } from 'primeng/stepper';
 import { ShopCategory, ShopProduct } from '../../../core/models/shop-product.model';
@@ -16,6 +17,7 @@ interface ProductDraft {
   name: string;
   description: string;
   category: ShopCategory | '';
+  subcategories: string[];
   price: string;
   stockQuantity: number;
   active: boolean;
@@ -24,11 +26,14 @@ interface ProductDraft {
   imageAlt: string;
 }
 
-const EMPTY_DRAFT: ProductDraft = { name: '', description: '', category: '', price: '', stockQuantity: 0, active: true, badge: '', imageUrl: '', imageAlt: '' };
+type ProductFilter = 'all' | 'active' | 'inactive' | 'out-of-stock';
+const PAGE_SIZE = 5;
+
+const EMPTY_DRAFT: ProductDraft = { name: '', description: '', category: '', subcategories: [], price: '', stockQuantity: 0, active: true, badge: '', imageUrl: '', imageAlt: '' };
 
 @Component({
   selector: 'app-products-page',
-  imports: [BrlCurrencyPipe, FormsModule, RouterLink, FaIconComponent, SelectModule, StepperModule, LoadingComponent],
+  imports: [BrlCurrencyPipe, FormsModule, FaIconComponent, ChipModule, SelectModule, StepperModule, LoadingComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './products.page.html',
   styleUrl: './products.page.scss',
@@ -43,6 +48,7 @@ export class ProductsPage {
     { label: 'Brincos', value: 'brincos' },
     { label: 'Colares', value: 'colares' },
     { label: 'Pulseiras', value: 'pulseiras' },
+    { label: 'Anéis', value: 'aneis' },
     { label: 'Conjuntos', value: 'conjuntos' },
   ];
   readonly availabilityOptions = [
@@ -61,7 +67,22 @@ export class ProductsPage {
   readonly media = this.pendingMedia.asReadonly();
   readonly step = signal(1);
   readonly search = signal('');
-  readonly filteredProducts = computed(() => this.catalog.products().filter(product => product.name.toLocaleLowerCase('pt-BR').includes(this.search().toLocaleLowerCase('pt-BR'))));
+  readonly filter = signal<ProductFilter>('all');
+  readonly page = signal(1);
+  readonly filteredProducts = computed(() => this.catalog.products().filter(product => {
+    const matchesSearch = product.name.toLocaleLowerCase('pt-BR').includes(this.search().toLocaleLowerCase('pt-BR'));
+    const status = this.filter();
+    return matchesSearch && (status === 'all' || status === 'active' && product.active !== false ||
+      status === 'inactive' && product.active === false || status === 'out-of-stock' && product.stockQuantity === 0);
+  }));
+  readonly pageCount = computed(() => Math.max(1, Math.ceil(this.filteredProducts().length / PAGE_SIZE)));
+  readonly currentPage = computed(() => Math.min(this.page(), this.pageCount()));
+  readonly visibleProducts = computed(() => this.filteredProducts().slice((this.currentPage() - 1) * PAGE_SIZE, this.currentPage() * PAGE_SIZE));
+  readonly pages = computed(() => Array.from({ length: this.pageCount() }, (_, index) => index + 1));
+
+  setFilter(value: ProductFilter): void { this.filter.set(value); this.page.set(1); }
+  setSearch(value: string): void { this.search.set(value); this.page.set(1); }
+  setPage(value: number): void { this.page.set(Math.min(Math.max(1, value), this.pageCount())); }
   draft: ProductDraft = this.selectedProduct() ? this.toDraft(this.selectedProduct()!) : { ...EMPTY_DRAFT };
   error = '';
   feedback = '';
@@ -114,6 +135,7 @@ export class ProductsPage {
       imageUrl: this.draft.imageUrl,
       imageAlt: this.draft.imageAlt.trim() || this.draft.name.trim(),
       category,
+      subcategories: category === 'conjuntos' ? this.draft.subcategories : [],
       stockQuantity: Number(this.draft.stockQuantity),
       active: this.draft.active,
       badge: this.draft.badge || undefined,
@@ -164,6 +186,18 @@ export class ProductsPage {
       return false;
     }
     return true;
+  }
+
+  addGroup(input: HTMLInputElement): void {
+    const name = input.value.trim();
+    if (name && !this.draft.subcategories.some(group => group.localeCompare(name, 'pt-BR', { sensitivity: 'base' }) === 0)) {
+      this.draft.subcategories = [...this.draft.subcategories, name];
+    }
+    input.value = '';
+  }
+
+  removeGroup(name: string): void {
+    this.draft.subcategories = this.draft.subcategories.filter(group => group !== name);
   }
 
   formatPrice(): void {
@@ -220,7 +254,8 @@ export class ProductsPage {
   }
 
   private toDraft(product: ShopProduct): ProductDraft {
-    return { name: product.name, description: product.description, category: product.category, price: this.currencyFormatter.transform(product.price), stockQuantity: product.stockQuantity, active: product.active !== false, badge: product.badge ?? (product.isBestSeller ? 'MAIS VENDIDO' : ''), imageUrl: product.imageUrl, imageAlt: product.imageAlt };
+    const subcategories = [...(product.subcategories ?? [])];
+    return { name: product.name, description: product.description, category: product.category, subcategories, price: this.currencyFormatter.transform(product.price), stockQuantity: product.stockQuantity, active: product.active !== false, badge: product.badge ?? (product.isBestSeller ? 'MAIS VENDIDO' : ''), imageUrl: product.imageUrl, imageAlt: product.imageAlt };
   }
 
   private parsePrice(value: string): number {

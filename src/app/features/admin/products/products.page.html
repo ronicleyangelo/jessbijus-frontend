@@ -2,10 +2,16 @@
   <header class="admin-page__heading"><div><h1>Produtos</h1><p>Cadastre, edite preços e atualize quantidades manualmente.</p></div><button class="admin-button" type="button" (click)="startNewProduct()"><fa-icon [icon]="plusIcon" />Novo produto</button></header>
   <div class="products-page__grid">
     <section class="admin-card products-page__catalog" aria-labelledby="admin-catalog-title">
-      <h2 id="admin-catalog-title">Seu catálogo</h2>
-      <label class="products-page__search"><span class="sr-only">Buscar produto</span><input type="search" placeholder="Buscar produto..." [value]="search()" (input)="search.set($any($event.target).value)" /></label>
+      <div class="products-page__list-heading"><h2 id="admin-catalog-title">Seu catálogo</h2><button type="button" [disabled]="catalog.loading()" (click)="catalog.load()">Atualizar</button></div>
+      <label class="products-page__search"><span class="sr-only">Buscar produto</span><input type="search" placeholder="Buscar produto..." [value]="search()" (input)="setSearch($any($event.target).value)" /></label>
+      <div class="products-page__filters" role="group" aria-label="Filtrar produtos">
+        <button type="button" [class.is-active]="filter() === 'all'" (click)="setFilter('all')">Todos</button>
+        <button type="button" [class.is-active]="filter() === 'active'" (click)="setFilter('active')">Ativos</button>
+        <button type="button" [class.is-active]="filter() === 'inactive'" (click)="setFilter('inactive')">Inativos</button>
+        <button type="button" [class.is-active]="filter() === 'out-of-stock'" (click)="setFilter('out-of-stock')">Sem estoque</button>
+      </div>
       @if (catalog.loading()) { <app-loading message="Carregando produtos..." /> } @else if (catalog.error()) { <p class="admin-feedback admin-feedback--error" role="alert">{{ catalog.error() }}</p> } @else if (filteredProducts().length) {
-        <div class="products-page__list">@for (product of filteredProducts(); track product.id) {
+        <div class="products-page__list">@for (product of visibleProducts(); track product.id) {
           <button class="products-page__item" type="button" [class.is-selected]="selectedProductId() === product.id" (click)="selectProduct(product.id)">
             <img [src]="product.imageUrl" [alt]="product.imageAlt" />
             <span><strong>{{ product.name }}</strong><small>{{ product.price | brlCurrency }} · {{ product.stockQuantity }} {{ product.stockQuantity === 1 ? 'unidade' : 'unidades' }}</small></span>
@@ -13,6 +19,11 @@
           </button>
         }</div>
       } @else { <p class="admin-empty">Nenhum produto encontrado.</p> }
+      @if (pageCount() > 1) { <nav class="products-page__pagination" aria-label="Páginas dos produtos">
+        <button type="button" [disabled]="currentPage() <= 1" aria-label="Página anterior" (click)="setPage(currentPage() - 1)">‹</button>
+        @for (number of pages(); track number) { <button type="button" [class.is-current]="currentPage() === number" [attr.aria-current]="currentPage() === number ? 'page' : null" (click)="setPage(number)">{{ number }}</button> }
+        <button type="button" [disabled]="currentPage() >= pageCount()" aria-label="Próxima página" (click)="setPage(currentPage() + 1)">›</button>
+      </nav> }
     </section>
 
     <section class="admin-card products-page__editor" aria-labelledby="editor-title">
@@ -32,13 +43,30 @@
         </div>
         <div class="admin-field"><label for="product-name">Nome</label><input id="product-name" name="name" [(ngModel)]="draft.name" placeholder="Nome da peça" required maxlength="160" /></div>
         <div class="admin-field"><label for="product-description">Descrição</label><textarea id="product-description" name="description" [(ngModel)]="draft.description" placeholder="Detalhes da peça para a página do produto"></textarea></div>
-        <div class="products-page__form-grid">
-          <div class="admin-field"><label for="product-category">Categoria</label><p-select inputId="product-category" name="category" [(ngModel)]="draft.category" [options]="categoryOptions" optionLabel="label" optionValue="value" placeholder="Selecione uma categoria" appendTo="body" styleClass="products-page__select" panelStyleClass="products-page__select-panel" required /></div>
+        <div class="products-page__form-grid" [class.products-page__form-grid--has-subcategories]="draft.category === 'conjuntos'">
+          <div class="admin-field"><label for="product-category">Categoria</label><p-select inputId="product-category" name="category" [ngModel]="draft.category" (ngModelChange)="draft.category = $event; draft.subcategories = []" [options]="categoryOptions" optionLabel="label" optionValue="value" placeholder="Selecione uma categoria" appendTo="body" styleClass="products-page__select" panelStyleClass="products-page__select-panel" required /></div>
+          @if (draft.category === 'conjuntos') {
+            <div class="admin-field">
+              <label for="product-subcategory">Subcategorias</label>
+              <input #groupInput id="product-subcategory" list="set-subcategories" maxlength="100"
+                placeholder="Digite e pressione Enter"
+                (keydown.enter)="$event.preventDefault(); addGroup(groupInput)"
+                (change)="addGroup(groupInput)" (blur)="addGroup(groupInput)" />
+              <datalist id="set-subcategories">@for (group of catalog.subcategories(); track group.id) { <option [value]="group.name"></option> }</datalist>
+              <div class="products-page__chips">
+                @for (group of draft.subcategories; track group) {
+                  <p-chip [label]="group" [removable]="true" (onRemove)="removeGroup(group)" />
+                }
+              </div>
+            </div>
+          }
           <div class="admin-field"><label for="product-price">Preço</label><input id="product-price" name="price" [(ngModel)]="draft.price" (blur)="formatPrice()" inputmode="decimal" placeholder="R$ 0,00" required /></div>
           <div class="admin-field"><label for="product-stock">Quantidade em estoque</label><input id="product-stock" name="stock" type="number" min="0" step="1" [(ngModel)]="draft.stockQuantity" required /></div>
-          <div class="admin-field"><label for="product-active">Disponibilidade</label><p-select inputId="product-active" name="active" [(ngModel)]="draft.active" [options]="availabilityOptions" optionLabel="label" optionValue="value" appendTo="body" styleClass="products-page__select" panelStyleClass="products-page__select-panel" /></div>
         </div>
-        <div class="admin-field"><label for="product-badge">Destaque na loja</label><p-select inputId="product-badge" name="badge" [(ngModel)]="draft.badge" [options]="badgeOptions" optionLabel="label" optionValue="value" appendTo="body" styleClass="products-page__select" panelStyleClass="products-page__select-panel" /></div>
+        <div class="products-page__form-grid">
+          <div class="admin-field"><label for="product-active">Disponibilidade</label><p-select inputId="product-active" name="active" [(ngModel)]="draft.active" [options]="availabilityOptions" optionLabel="label" optionValue="value" appendTo="body" styleClass="products-page__select" panelStyleClass="products-page__select-panel" /></div>
+          <div class="admin-field"><label for="product-badge">Destaque na loja</label><p-select inputId="product-badge" name="badge" [(ngModel)]="draft.badge" [options]="badgeOptions" optionLabel="label" optionValue="value" appendTo="body" styleClass="products-page__select" panelStyleClass="products-page__select-panel" /></div>
+        </div>
         @if (error) { <p class="admin-feedback admin-feedback--error" role="alert">{{ error }}</p> }
         <div class="products-page__actions"><button class="admin-button admin-button--soft" type="button" (click)="nextStep()">Continuar para fotos e vídeos →</button>@if (selectedProductId()) { <button class="admin-button" type="button" [disabled]="saving" (click)="saveProduct()">{{ saving ? 'Salvando...' : 'Salvar alterações' }}</button> }</div>
         } @else {
@@ -59,8 +87,6 @@
         }
       </form>
 
-      @if (selectedProduct(); as product) { <a class="admin-text-link" [routerLink]="['/produto', product.id]">Ver página do produto →</a> }
     </section>
   </div>
-  <p class="admin-page__note">Produtos e galeria são salvos na API da loja.</p>
 </main>

@@ -5,6 +5,7 @@ export interface ApiProductImage { id: string; url: string; altText: string; dis
 export interface ApiProduct {
   id: string;
   categoryId: string;
+  subcategories?: string[];
   name: string;
   description: string | null;
   price: number;
@@ -18,6 +19,7 @@ export interface ApiProduct {
 }
 export interface ApiProductRequest {
   categoryId: string;
+  subcategories?: string[];
   name: string;
   description: string;
   price: number;

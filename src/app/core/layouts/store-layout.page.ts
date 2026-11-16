@@ -5,7 +5,8 @@ import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { faBars, faCartShopping, faInstagram, faMagnifyingGlass, faWhatsapp, faXmark } from '../../shared/icons';
 import { BrandComponent } from '../../shared/components/brand/brand.component';
 import { ShopCartService } from '../services/shop-cart.service';
-import { isShopFilter } from '../data/shop-catalog';
+import { filterProducts, isShopFilter } from '../data/shop-catalog';
+import { ShopCatalogService } from '../services/shop-catalog.service';
 
 @Component({
   selector: 'app-store-layout-page',
@@ -19,6 +20,12 @@ export class StoreLayoutPage {
   private readonly route = inject(ActivatedRoute);
   private readonly params = toSignal(this.route.queryParamMap, { initialValue: this.route.snapshot.queryParamMap });
   readonly cart = inject(ShopCartService);
+  readonly catalog = inject(ShopCatalogService);
+  readonly searchText = signal('');
+  readonly searchFocused = signal(false);
+  readonly suggestions = computed(() => this.searchText().trim()
+    ? filterProducts(this.catalog.activeProducts(), 'todos', this.searchText()).slice(0, 5)
+    : []);
   readonly activeCategory = computed(() => {
     const value = this.params().get('categoria');
     return isShopFilter(value) ? value : 'todos';
@@ -34,8 +41,11 @@ export class StoreLayoutPage {
 
   searchProducts(event: Event, value: string): void {
     event.preventDefault();
+    this.searchFocused.set(false);
     void this.router.navigate(['/colecao'], { queryParams: { busca: value.trim() || null } });
   }
+
+  closeSuggestions(): void { this.searchFocused.set(false); }
 
   closeMenu(): void {
     this.menuOpen.set(false);

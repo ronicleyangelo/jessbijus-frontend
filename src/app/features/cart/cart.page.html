@@ -48,8 +48,8 @@
             <input id="customer-name" #nameInput type="text" name="customerName" autocomplete="name" placeholder="Digite seu nome" required maxlength="80" />
             <p class="cart__name-help">Seu nome será incluído na mensagem para a loja.</p>
             <p class="cart__manual-note">Entrega e pagamento são combinados diretamente com a loja.</p>
-            @if (error) { <p role="alert">{{ error }}</p> }
-            <button class="cart__send" type="submit" [disabled]="sending">{{ sending ? 'Registrando pedido...' : 'Enviar pedido pelo WhatsApp' }}</button>
+            @if (error()) { <p role="alert">{{ error() }}</p> }
+            <button class="cart__send" type="submit" [disabled]="sending()">{{ sending() ? 'Registrando pedido...' : 'Enviar pedido pelo WhatsApp' }}</button>
             <p class="cart__disclaimer">Nenhuma cobrança acontece nesta etapa.</p>
           </form>
         </section>

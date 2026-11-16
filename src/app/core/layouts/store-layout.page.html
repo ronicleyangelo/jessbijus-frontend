@@ -20,12 +20,24 @@
       <app-brand />
       </div>
 
-      <form class="site-search-wrap col-12 col-lg-5" role="search" (submit)="searchProducts($event, searchInput.value)">
+      <form class="site-search-wrap col-12 col-lg-5" role="search" (submit)="searchProducts($event, searchInput.value)" (focusout)="closeSuggestions()">
         <div class="site-search">
         <label class="visually-hidden" for="product-search">Buscar produtos</label>
-        <input id="product-search" #searchInput type="search" [value]="activeSearch()" placeholder="Buscar em todos os produtos" />
+        <input id="product-search" #searchInput type="search" [value]="activeSearch()" (input)="searchText.set(searchInput.value)" (focus)="searchFocused.set(true)" placeholder="Buscar em todos os produtos" autocomplete="off" />
         <button type="submit" aria-label="Buscar"><fa-icon [icon]="searchIcon" /></button>
         </div>
+        @if (searchFocused() && searchText().trim()) {
+          <div class="site-search__suggestions">
+            @for (product of suggestions(); track product.id) {
+              <a [routerLink]="['/produto', product.id]" (mousedown)="$event.preventDefault()" (click)="closeSuggestions()">
+                <img [src]="product.imageUrl" [alt]="product.imageAlt" />
+                <span><strong>{{ product.name }}</strong><small>{{ product.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) }}</small></span>
+              </a>
+            } @empty {
+              <p class="site-search__empty" role="status">Nenhum resultado encontrado.</p>
+            }
+          </div>
+        }
       </form>
 
       <div class="site-header__actions col-3 col-lg-4">
@@ -46,6 +58,7 @@
         <a routerLink="/colecao" [queryParams]="{ categoria: 'colares', busca: activeSearch() || null }" [class.site-navigation__active]="activeCategory() === 'colares'" (click)="closeMenu()">Colares</a>
         <a routerLink="/colecao" [queryParams]="{ categoria: 'pulseiras', busca: activeSearch() || null }" [class.site-navigation__active]="activeCategory() === 'pulseiras'" (click)="closeMenu()">Pulseiras</a>
         <a routerLink="/colecao" [queryParams]="{ categoria: 'conjuntos', busca: activeSearch() || null }" [class.site-navigation__active]="activeCategory() === 'conjuntos'" (click)="closeMenu()">Conjuntos</a>
+        <a routerLink="/colecao" [queryParams]="{ categoria: 'aneis', busca: activeSearch() || null }" [class.site-navigation__active]="activeCategory() === 'aneis'" (click)="closeMenu()">Anéis</a>
         <a routerLink="/colecao" [queryParams]="{ categoria: 'mais-vendidos', busca: activeSearch() || null }" [class.site-navigation__active]="activeCategory() === 'mais-vendidos'" (click)="closeMenu()">Mais vendidos</a>
       </div>
     </nav>
@@ -55,14 +68,11 @@
 
   <footer class="site-footer">
     <div class="site-footer__inner">
-      <div class="site-footer__brand">
-        <a routerLink="/">JESSBIJUS</a>
-        <span>Cada detalhe, um carinho.</span>
-      </div>
+      <div class="site-footer__brand"><app-brand [inverse]="true" /></div>
       <div class="site-footer__contact">
         <strong>Atendimento</strong>
         <div class="site-footer__contact-links">
-          <a href="https://wa.me/5527992710806" target="_blank" rel="noopener noreferrer"><fa-icon [icon]="whatsappIcon" aria-hidden="true" /> WhatsApp</a>
+          <a href="https://wa.me/5527992285969" target="_blank" rel="noopener noreferrer"><fa-icon [icon]="whatsappIcon" aria-hidden="true" /> WhatsApp</a>
           <a href="https://instagram.com/jessbijus_/" target="_blank" rel="noopener noreferrer"><fa-icon [icon]="instagramIcon" aria-hidden="true" /> @jessbijus</a>
         </div>
       </div>
